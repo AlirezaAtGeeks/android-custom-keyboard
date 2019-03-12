@@ -27,6 +27,7 @@ class CustomKeyboard {
 
         val CodeUpperCase = -1
         val CodeLowerCase = -2
+        val CodeSymbol = -4
         val CodeDelete = -5 // Keyboard.KEYCODE_DELETE
         val CodeCancel = -3 // Keyboard.KEYCODE_CANCEL
         val CodePrev = 55000
@@ -71,6 +72,9 @@ class CustomKeyboard {
                 mKeyboardView!!.invalidateAllKeys()
             } else if (primaryCode == CodeLowerCase) {
                 mKeyboardView!!.keyboard = Keyboard(mHostActivity, R.xml.keyboard)
+                mKeyboardView!!.invalidateAllKeys()
+            } else if (primaryCode == CodeSymbol) {
+                mKeyboardView!!.keyboard = Keyboard(mHostActivity, R.xml.symbols)
                 mKeyboardView!!.invalidateAllKeys()
             } else{ // insert character
                 editable!!.insert(start, Character.toString(primaryCode.toChar()))
