@@ -2,6 +2,7 @@ package payzone.uk.co.customkeyboarddemo
 
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
+import payzone.uk.co.customkeyboard.CustomKeyboard
 
 class MainActivity : AppCompatActivity() {
 
@@ -11,9 +12,12 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        mCustomKeyboard = CustomKeyboard(this, R.id.keyboardview, payzone.uk.co.customkeyboard.xml.keyboard)
+        mCustomKeyboard = CustomKeyboard(
+            this,
+            R.id.keyboardview,
+            R.xml.keyboard
+        )
 
         mCustomKeyboard!!.registerEditText(R.id.edittext0)
-        mCustomKeyboard!!.registerEditText(R.id.edittext1)
     }
 }
