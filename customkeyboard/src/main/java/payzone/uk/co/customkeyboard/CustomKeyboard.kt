@@ -16,14 +16,17 @@ import android.view.inputmethod.InputMethodManager
 
 
 class CustomKeyboard {
-    /** A link to the KeyboardView that is used to render this CustomKeyboard.  */
-    private var mKeyboardView: KeyboardView
     /** A link to the activity that hosts the [.mKeyboardView].  */
     private var mHostActivity: Activity = Activity()
+
+    /** A link to the KeyboardView that is used to render this CustomKeyboard.  */
+    private var mKeyboardView: KeyboardView? = null
 
     /** The key (code) handler.  */
     private val mOnKeyboardActionListener = object: OnKeyboardActionListener {
 
+        val CodeUpperCase = -1
+        val CodeLowerCase = -2
         val CodeDelete = -5 // Keyboard.KEYCODE_DELETE
         val CodeCancel = -3 // Keyboard.KEYCODE_CANCEL
         val CodePrev = 55000
@@ -39,9 +42,9 @@ class CustomKeyboard {
             // Get the EditText and its Editable
             val focusCurrent = mHostActivity.window.currentFocus
             if (focusCurrent == null || focusCurrent::class.java !== android.support.v7.widget.AppCompatEditText::class.java) return
-            val edittext = focusCurrent as EditText
-            val editable = edittext.text
-            val start = edittext.selectionStart
+            val editText = focusCurrent as EditText
+            val editable = editText.text
+            val start = editText.selectionStart
             // Apply the key to the edit text
             if (primaryCode == CodeCancel) {
                 hideCustomKeyboard()
@@ -50,20 +53,26 @@ class CustomKeyboard {
             } else if (primaryCode == CodeClear) {
                 editable?.clear()
             } else if (primaryCode == CodeLeft) {
-                if (start > 0) edittext.setSelection(start - 1)
+                if (start > 0) editText.setSelection(start - 1)
             } else if (primaryCode == CodeRight) {
-                if (start < edittext.length()) edittext.setSelection(start + 1)
+                if (start < editText.length()) editText.setSelection(start + 1)
             } else if (primaryCode == CodeAllLeft) {
-                edittext.setSelection(0)
+                editText.setSelection(0)
             } else if (primaryCode == CodeAllRight) {
-                edittext.setSelection(edittext.length())
+                editText.setSelection(editText.length())
             } else if (primaryCode == CodePrev) {
-                val focusNew = edittext.focusSearch(View.FOCUS_RIGHT)
+                val focusNew = editText.focusSearch(View.FOCUS_RIGHT)
                 focusNew?.requestFocus()
             } else if (primaryCode == CodeNext) {
-                val focusNew = edittext.focusSearch(View.FOCUS_RIGHT)
+                val focusNew = editText.focusSearch(View.FOCUS_RIGHT)
                 focusNew?.requestFocus()
-            } else { // insert character
+            } else if (primaryCode == CodeUpperCase) {
+                mKeyboardView!!.keyboard = Keyboard(mHostActivity, R.xml.cap_keyboard)
+                mKeyboardView!!.invalidateAllKeys()
+            } else if (primaryCode == CodeLowerCase) {
+                mKeyboardView!!.keyboard = Keyboard(mHostActivity, R.xml.keyboard)
+                mKeyboardView!!.invalidateAllKeys()
+            } else{ // insert character
                 editable!!.insert(start, Character.toString(primaryCode.toChar()))
             }
         }
@@ -97,22 +106,22 @@ class CustomKeyboard {
     constructor(host: Activity, viewid: Int, layoutid: Int){
         mHostActivity = host
         mKeyboardView = mHostActivity.findViewById<View>(viewid) as KeyboardView
-        mKeyboardView.keyboard = Keyboard(mHostActivity, layoutid)
-        mKeyboardView.isPreviewEnabled = false // NOTE Do not show the preview balloons
-        mKeyboardView.setOnKeyboardActionListener(mOnKeyboardActionListener)
+        mKeyboardView!!.keyboard = Keyboard(mHostActivity, layoutid)
+        mKeyboardView!!.isPreviewEnabled = false // NOTE Do not show the preview balloons
+        mKeyboardView!!.setOnKeyboardActionListener(mOnKeyboardActionListener)
         // Hide the standard keyboard initially
         mHostActivity.window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN)
     }
 
     /** Returns whether the CustomKeyboard is visible.  */
     fun isCustomKeyboardVisible(): Boolean {
-        return mKeyboardView.visibility == View.VISIBLE
+        return mKeyboardView!!.visibility == View.VISIBLE
     }
 
     /** Make the CustomKeyboard visible, and hide the system keyboard for view v.  */
     fun showCustomKeyboard(v: View?) {
-        mKeyboardView.visibility = View.VISIBLE
-        mKeyboardView.isEnabled = true
+        mKeyboardView!!.visibility = View.VISIBLE
+        mKeyboardView!!.isEnabled = true
         if (v != null) (mHostActivity.getSystemService(Activity.INPUT_METHOD_SERVICE) as InputMethodManager).hideSoftInputFromWindow(
             v.windowToken,
             0
@@ -121,8 +130,8 @@ class CustomKeyboard {
 
     /** Make the CustomKeyboard invisible.  */
     fun hideCustomKeyboard() {
-        mKeyboardView.visibility = View.GONE
-        mKeyboardView.isEnabled = false
+        mKeyboardView!!.visibility = View.GONE
+        mKeyboardView!!.isEnabled = false
     }
 
     /**
