@@ -1,2 +1,2 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-          package="payzone.uk.co.customkeyboard"/>
+          package="com.payzone.lib.keyboard"/>

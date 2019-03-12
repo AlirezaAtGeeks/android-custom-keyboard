@@ -1,4 +1,4 @@
-package payzone.uk.co.customkeyboard;
+package com.payzone.lib.keyboard;
 
 import android.content.Context;
 import android.support.test.InstrumentationRegistry;
@@ -21,6 +21,6 @@ public class ExampleInstrumentedTest {
         // Context of the app under test.
         Context appContext = InstrumentationRegistry.getTargetContext();
 
-        assertEquals("payzone.uk.co.customkeyboard.test", appContext.getPackageName());
+        assertEquals("com.payzone.lib.keyboard.test", appContext.getPackageName());
     }
 }

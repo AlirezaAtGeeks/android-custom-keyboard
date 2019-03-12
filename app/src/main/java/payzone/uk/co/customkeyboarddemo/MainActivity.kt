@@ -2,7 +2,7 @@ package payzone.uk.co.customkeyboarddemo
 
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
-import payzone.uk.co.customkeyboard.CustomKeyboard
+import com.payzone.lib.keyboard.CustomKeyboard
 
 class MainActivity : AppCompatActivity() {
 

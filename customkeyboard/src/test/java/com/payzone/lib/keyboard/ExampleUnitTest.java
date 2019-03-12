@@ -1,4 +1,4 @@
-package payzone.uk.co.customkeyboard;
+package com.payzone.lib.keyboard;
 
 import org.junit.Test;
 

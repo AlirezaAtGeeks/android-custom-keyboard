@@ -1,4 +1,4 @@
-package payzone.uk.co.customkeyboard
+package com.payzone.lib.keyboard
 
 import android.annotation.SuppressLint
 import android.text.InputType
