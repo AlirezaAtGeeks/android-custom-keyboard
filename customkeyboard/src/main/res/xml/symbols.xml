@@ -47,6 +47,6 @@
         <Key android:codes="32" android:isRepeatable="true" android:keyLabel="SPACE" android:keyWidth="40%p"/>
         <Key android:codes="-5" android:isRepeatable="true"  android:keyLabel="DEL" android:keyWidth="10%p"/>
         <Key android:codes="-2" android:keyLabel="ABC" android:keyWidth="10%p"/>
-        <Key android:codes="-10" android:keyEdgeFlags="right" android:keyIcon="@drawable/ic_keyboard_hide_white_24dp" android:keyWidth="10%p"/>
+        <Key android:codes="-3" android:keyEdgeFlags="right" android:keyIcon="@drawable/ic_keyboard_hide_white_24dp" android:keyWidth="10%p"/>
     </Row>
 </Keyboard>
