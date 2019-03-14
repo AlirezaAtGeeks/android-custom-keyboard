@@ -3,17 +3,17 @@ package com.payzone.lib.keyboard
 import android.annotation.SuppressLint
 import android.text.InputType
 import android.widget.EditText
-import android.view.MotionEvent
-import android.view.View.OnTouchListener
 import android.view.View.OnFocusChangeListener
 import android.app.Activity
+import android.content.Context
 import android.view.WindowManager
 import android.inputmethodservice.Keyboard
 import android.inputmethodservice.KeyboardView
 import android.inputmethodservice.KeyboardView.OnKeyboardActionListener
+import android.media.AudioManager
 import android.view.View
 import android.view.inputmethod.InputMethodManager
-
+import android.widget.ScrollView
 
 class CustomKeyboard {
     /** A link to the activity that hosts the [.mKeyboardView].  */
@@ -21,6 +21,8 @@ class CustomKeyboard {
 
     /** A link to the KeyboardView that is used to render this CustomKeyboard.  */
     private var mKeyboardView: KeyboardView? = null
+
+    private var scrollView: ScrollView? = null
 
     /** The key (code) handler.  */
     private val mOnKeyboardActionListener = object: OnKeyboardActionListener {
@@ -79,6 +81,9 @@ class CustomKeyboard {
             } else{ // insert character
                 editable!!.insert(start, Character.toString(primaryCode.toChar()))
             }
+
+            if(enableSound)
+                beep()
         }
 
         override fun onPress(arg0: Int) {}
@@ -94,6 +99,11 @@ class CustomKeyboard {
         override fun swipeRight() {}
 
         override fun swipeUp() {}
+
+        private fun beep(){
+            val vol = 1.0f
+            audioManager!!.playSoundEffect(AudioManager.FX_KEY_CLICK, vol)
+        }
     }
 
     /**
@@ -104,17 +114,27 @@ class CustomKeyboard {
      * Note that to enable EditText's to use this custom keyboard, call the [.registerEditText].
      *
      * @param host The hosting activity.
+     * @param scrollView The scroll view reference with the all contents in it
      * @param viewid The id of the KeyboardView.
      * @param layoutid The id of the xml file containing the keyboard layout.
+     * @param enableSound Enabling and disabling the key tone
+     *
      */
-    constructor(host: Activity, viewid: Int, layoutid: Int){
+    constructor(host: Activity, scrollview: ScrollView, viewid: Int, layoutid: Int, enableSound: Boolean = false){
         mHostActivity = host
+        scrollView = scrollview
         mKeyboardView = mHostActivity.findViewById<View>(viewid) as KeyboardView
         mKeyboardView!!.keyboard = Keyboard(mHostActivity, layoutid)
         mKeyboardView!!.isPreviewEnabled = false // NOTE Do not show the preview balloons
         mKeyboardView!!.setOnKeyboardActionListener(mOnKeyboardActionListener)
         // Hide the standard keyboard initially
         mHostActivity.window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN)
+
+        this.enableSound = enableSound
+
+        // setup audio manager
+        this.audioManager = mHostActivity.applicationContext.getSystemService(Context.AUDIO_SERVICE) as AudioManager
+
     }
 
     /** Returns whether the CustomKeyboard is visible.  */
@@ -134,6 +154,9 @@ class CustomKeyboard {
 
     /** Make the CustomKeyboard invisible.  */
     fun hideCustomKeyboard() {
+        scrollView!!.setPadding(0, 0, 0, 0)
+        scrollView!!.scrollTo(scrollView!!.height, scrollView!!.width)
+
         mKeyboardView!!.visibility = View.GONE
         mKeyboardView!!.isEnabled = false
     }
@@ -147,31 +170,48 @@ class CustomKeyboard {
     fun registerEditText(resid: Int) {
         // Find the EditText 'resid'
         val editText = mHostActivity.findViewById<View>(resid) as EditText
+        // Disable the select text functionality
+        editText.setTextIsSelectable(true)
         // Make the custom keyboard appear
         editText.onFocusChangeListener = OnFocusChangeListener { v, hasFocus ->
             // NOTE By setting the on focus listener, we can show the custom keyboard when the edit box gets focus, but also hide it when the edit box loses focus
-            if (hasFocus) showCustomKeyboard(v) else hideCustomKeyboard()
+            if (hasFocus) {
+                dismissKeyboard(editText)
+                val left = v.left
+                val top = v.top
+                val bottom = v.bottom
+                val keyboardHeight = mKeyboardView!!.height
+
+                // if the bottom of edit text is greater than scroll view height divide by 3,
+                // it means that the keyboard is visible
+                if (bottom > keyboardHeight) {
+                    // increase scroll view with padding
+                    scrollView!!.setPadding(0, 0, 0, keyboardHeight)
+                    // scroll to the edit text position
+                    scrollView!!.scrollTo(left, top)
         }
+
+                var handler = android.os.Handler()
+                handler.postDelayed({
+                    showCustomKeyboard(v)
+                }, 100)
+            }
+            else hideCustomKeyboard()
+        }
+
         editText.setOnClickListener { v ->
             // NOTE By setting the on click listener, we can show the custom keyboard again, by tapping on an edit box that already had focus (but that had the keyboard hidden).
             showCustomKeyboard(v)
 
 
         }
-        // Disable standard keyboard hard way
-        // NOTE There is also an easy way: 'edittext.setInputType(InputType.TYPE_NULL)' (but you will not have a cursor, and no 'edittext.setCursorVisible(true)' doesn't work )
-        editText.setOnTouchListener(object : OnTouchListener {
-            override fun onTouch(v: View, event: MotionEvent): Boolean {
-                val edittext = v as EditText
-                val inType = edittext.inputType       // Backup the input type
-                edittext.inputType = InputType.TYPE_NULL // Disable standard keyboard
-                edittext.onTouchEvent(event)               // Call native handler
-                edittext.inputType = inType              // Restore input type
-                return true // Consume touch event
-            }
-        })
 
         // Disable spell check (hex strings look like words to Android)
         editText.inputType = editText.inputType or InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS
+    }
+
+    fun dismissKeyboard(v: View) {
+        val imm = mHostActivity.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+        imm.hideSoftInputFromWindow(v.windowToken, 0)
     }
 }
