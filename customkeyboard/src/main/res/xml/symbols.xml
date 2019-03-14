@@ -29,6 +29,18 @@
         <Key android:codes="41" android:keyEdgeFlags="right" android:keyLabel=")" />
     </Row>
     <Row>
+        <Key android:codes="163" android:keyEdgeFlags="left" android:keyLabel="£" />
+        <Key android:codes="162" android:keyLabel="¢" />
+        <Key android:codes="8364" android:keyLabel="€" />
+        <Key android:codes="165" android:keyLabel="¥" />
+        <Key android:codes="94" android:keyLabel="^" />
+        <Key android:codes="96" android:keyLabel="`" />
+        <Key android:codes="43" android:keyLabel="+" />
+        <Key android:codes="92" android:keyLabel="\\" />
+        <Key android:codes="60" android:keyLabel="&lt;" />
+        <Key android:codes="62" android:keyLabel="&gt;" android:keyEdgeFlags="right" />
+    </Row>
+    <Row>
         <Key android:codes="42" android:keyLabel="*" />
         <Key android:codes="34" android:keyLabel="&quot;" />
         <Key android:codes="39" android:keyLabel="'" />
